@@ -1,18 +1,11 @@
-FROM python:2-alpine
+FROM python:3.6
 
-COPY ./requirements.txt /app/requirements.txt
+ENV FLASK_APP run.py
 
-WORKDIR /app
+COPY run.py gunicorn-cfg.py requirements.txt config.py .env ./
+COPY app app
 
-RUN apk --update add python py-pip openssl ca-certificates py-openssl wget bash linux-headers
-RUN apk --update add --virtual build-dependencies libffi-dev openssl-dev python-dev py-pip build-base \
-  && pip install --upgrade pip \
-  && pip install --upgrade pipenv\
-  && pip install --upgrade -r /app/requirements.txt\
-  && apk del build-dependencies
+RUN pip install -r requirements.txt
 
-COPY . /app
-
-ENTRYPOINT [ "python" ]
-
-CMD [ "hello.py" ]
+EXPOSE 5005
+CMD ["gunicorn", "--config", "gunicorn-cfg.py", "run:app"]

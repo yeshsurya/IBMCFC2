@@ -22,12 +22,15 @@
     <script src="js/lib/jquery.i18n/jquery.i18n.parser.js"></script>
     <script src="js/lib/jquery.i18n/jquery.i18n.emitter.js"></script>
     <script src="js/lib/jquery.i18n/jquery.i18n.emitter.bidi.js"></script>
-    <script src="antixss.js" type="text/javascript"></script>
+    
+    <script src="index_controller.js" type="text/javascript"></script>
+    
 	
     
     
 <!--
 https://codepen.io/georgehastings/pen/zNNqNe
+https://github.com/app-generator/flask-soft-ui-dashboard
 -->
 </head>
 
@@ -36,18 +39,11 @@ https://codepen.io/georgehastings/pen/zNNqNe
 
     <section class="login">
   <div class="container">
-    <h3 class="title">Sign in with</h3>
+    <h3 class="title">Sign in </h3>
     
-    <div class="social-login">
-      
-      <button><i class="fab fa-twitter"></i>Twitter</button>
-      <button><i class="fab fa-google"></i>Google</button>
-      
-    </div>
     
-    <p class="separator"><span>&nbsp;</span>Or<span>&nbsp;</span></p>
     
-    <form>
+    <form id = "userinput">
       <div class="form-group">
         <label for="username">Username</label>
         <input type="text" id="username" placeholder="Username">          
@@ -58,9 +54,9 @@ https://codepen.io/georgehastings/pen/zNNqNe
         <input type="password" id="password" placeholder="Password">          
       </div>
       
-      <button type="submit">Sign in</button>
+      <button type="submit" id="submit">Sign in</button>
     </form>
-    
+    <button id="test">Test</button>
     <p class="additional-act">Don't have an account? <span>Register</span></p>
     
     

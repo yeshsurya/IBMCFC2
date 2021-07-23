@@ -181,17 +181,12 @@ div {
   word-break: break-all;
   overflow: hidden;
   text-transform: uppercase;
-  
+}
   span {
     display: inline-block;
     opacity: 0;
     color: rgb(40,23,64);
     transition: opacity 0s ease;
-    
-    &.static {
-      opacity: 1 !important;
-      color: #fff !important;
-    }
-  }
-}
+  }  
+
 
