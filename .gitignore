@@ -1,28 +1,65 @@
-# byte-compiled / optimized / DLL files
+# Logs
+logs
+*.log
+
+# Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 
-# tests and coverage
-*.pytest_cache
+# C extensions
+*.so
+
+# Distribution / packaging
+bin/
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+/lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# python virtual environment/compiled files
+venv/
+*.pyc
+
+# PyInstaller
+#  Usually these files are written by a python script from a template
+#  before PyInstaller builds the exe, so as to inject date/other infos into it.
+*.manifest
+*.spec
+
+# Intellij/PyCharm config
+.idea/
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
 .coverage
+.cache
+nosetests.xml
+coverage.xml
 
-# database & logs
-*.db
-*.sqlite3
-*.log
+# Translations
+*.mo
+*.pot
 
-# venv
-env
-venv
+# PyBuilder
+target/
 
-# other
-.DS_Store
+# Mac files
+*.DS_Store
 
-# sphinx docs 
-_build
-_static
-_templates
-
-# javascript
-package-lock.json
-.vscode/symbols.json
+vcap-local.json

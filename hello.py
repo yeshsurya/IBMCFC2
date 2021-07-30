@@ -1,88 +1,76 @@
-from cloudant import Cloudant
-from flask import Flask, render_template, request, jsonify
-import atexit
-import os
-import json
-#Test commit
-app = Flask(__name__, static_url_path='')
+# -*- encoding: utf-8 -*-
 
-db_name = 'mydb'
-client = None
-db = None
 
-if 'VCAP_SERVICES' in os.environ:
-    vcap = json.loads(os.getenv('VCAP_SERVICES'))
-    print('Found VCAP_SERVICES')
-    if 'cloudantNoSQLDB' in vcap:
-        creds = vcap['cloudantNoSQLDB'][0]['credentials']
-        user = creds['username']
-        password = creds['password']
-        url = 'https://' + creds['host']
-        client = Cloudant(user, password, url=url, connect=True)
-        db = client.create_database(db_name, throw_on_exists=False)
-elif "CLOUDANT_URL" in os.environ:
-    client = Cloudant(os.environ['CLOUDANT_USERNAME'], os.environ['CLOUDANT_PASSWORD'], url=os.environ['CLOUDANT_URL'], connect=True)
-    db = client.create_database(db_name, throw_on_exists=False)
-elif os.path.isfile('vcap-local.json'):
-    with open('vcap-local.json') as f:
-        vcap = json.load(f)
-        print('Found local VCAP_SERVICES')
-        creds = vcap['services']['cloudantNoSQLDB'][0]['credentials']
-        user = creds['username']
-        password = creds['password']
-        url = 'https://' + creds['host']
-        client = Cloudant(user, password, url=url, connect=True)
-        db = client.create_database(db_name, throw_on_exists=False)
+from flask_migrate import Migrate
+from os import environ
+from sys import exit
+from decouple import config
+import logging
 
-# On IBM Cloud Cloud Foundry, get the port number from the environment variable PORT
-# When running this app on the local machine, default the port to 8000
-port = int(os.getenv('PORT', 8000))
 
-@app.route('/')
-def root():
-    return app.send_static_file('index.html')
+class Config(object):
+    import os
+    basedir    = os.path.abspath(os.path.dirname(__file__))
 
-# /* Endpoint to greet and add a new visitor to database.
-# * Send a POST request to localhost:8000/api/visitors with body
-# * {
-# *     "name": "Bob"
-# * }
-# */
-@app.route('/api/visitors', methods=['GET'])
-def get_visitor():
-    if client:
-        return jsonify(list(map(lambda doc: doc['name'], db)))
-    else:
-        print('No database')
-        return jsonify([])
+    # Set up the App SECRET_KEY
+    SECRET_KEY = config('SECRET_KEY', default='S#perS3crEt_007')
 
-# /**
-#  * Endpoint to get a JSON array of all the visitors in the database
-#  * REST API example:
-#  * <code>
-#  * GET http://localhost:8000/api/visitors
-#  * </code>
-#  *
-#  * Response:
-#  * [ "Bob", "Jane" ]
-#  * @return An array of all the visitor names
-#  */
-@app.route('/api/visitors', methods=['POST'])
-def put_visitor():
-    user = request.json['name']
-    data = {'name':user}
-    if client:
-        my_document = db.create_document(data)
-        data['_id'] = my_document['_id']
-        return jsonify(data)
-    else:
-        print('No database')
-        return jsonify(data)
+    # This will create a file in <app> FOLDER
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'db.sqlite3')
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
 
-@atexit.register
-def shutdown():
-    if client:
-        client.disconnect()
+class ProductionConfig(Config):
+    DEBUG = False
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=port, debug=True)
+    # Security
+    SESSION_COOKIE_HTTPONLY  = True
+    REMEMBER_COOKIE_HTTPONLY = True
+    REMEMBER_COOKIE_DURATION = 3600
+
+    # PostgreSQL database
+    SQLALCHEMY_DATABASE_URI = '{}://{}:{}@{}:{}/{}'.format(
+        config( 'DB_ENGINE'   , default='postgresql'    ),
+        config( 'DB_USERNAME' , default='appseed'       ),
+        config( 'DB_PASS'     , default='pass'          ),
+        config( 'DB_HOST'     , default='localhost'     ),
+        config( 'DB_PORT'     , default=5432            ),
+        config( 'DB_NAME'     , default='appseed-flask' )
+    )
+
+class DebugConfig(Config):
+    DEBUG = True
+
+config_dict = {
+    'Production': ProductionConfig,
+    'Debug'     : DebugConfig
+}
+import sys,os
+print(sys.path)
+sys.path.append(os.getcwd())
+print(sys.path)
+from app import create_app, db
+
+# WARNING: Don't run with debug turned on in production!
+DEBUG = config('DEBUG', default=True, cast=bool)
+
+# The configuration
+get_config_mode = 'Debug'
+
+try:
+    
+    # Load the configuration using the default values 
+    app_config = config_dict[get_config_mode.capitalize()]
+
+except KeyError:
+    exit('Error: Invalid <config_mode>. Expected values [Debug, Production] ')
+
+app = create_app( app_config ) 
+Migrate(app, db)
+
+if DEBUG:
+    app.logger.info('DEBUG       = ' + str(DEBUG)      )
+    app.logger.info('Environment = ' + get_config_mode )
+    app.logger.info('DBMS        = ' + app_config.SQLALCHEMY_DATABASE_URI )
+
+if __name__ == "__main__":
+    app.run(port=8080)

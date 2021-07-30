@@ -1,5 +1,4 @@
-.git
-__pycache__
-*.pyc
-*.pyo
-*.pyd
+.gitignore
+LICENSE
+README.md
+vcap-local.json

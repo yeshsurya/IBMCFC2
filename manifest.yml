@@ -1,5 +1,5 @@
 ---
 applications:
- - name: powerMonkGreen
+ - name: realTimeHazardUpdate
    random-route: true
    memory: 128M
